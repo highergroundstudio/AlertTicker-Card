@@ -1,5 +1,5 @@
 ﻿/**
- * AlertTicker Card v1.3.9.9.2
+ * AlertTicker Card v1.3.9.9.3
  * A Home Assistant custom Lovelace card to display alerts based on entity states.
  * Supports 50 visual themes with per-alert theme assignment, priority ordering,
  * fold animation cycling, snooze, numeric conditions, attribute triggers,
@@ -41,7 +41,7 @@ const css = LitElement.prototype.css ?? ((strings, ...values) => {
 // ---------------------------------------------------------------------------
 // Card version — declared early so getConfigElement() can reference it
 // ---------------------------------------------------------------------------
-const CARD_VERSION = "1.3.9.9.2";
+const CARD_VERSION = "1.3.9.9.3";
 
 // ---------------------------------------------------------------------------
 // Google Cast compatibility (#171)
@@ -2162,6 +2162,22 @@ class AlertTickerCard extends LitElement {
       active.forEach((alert) => {
         const key = this._snoozeKey(alert);
         if (!prevKeys.has(key)) {
+          // Capture trigger state snapshot BEFORE recording history / TTS / push,
+          // so those consumers can already substitute {trigger_state}/{trigger_time}
+          // via _resolveMessage.
+          if (alert.entity && this._hass && !this._triggerStates.has(key)) {
+            const es = this._hass.states[alert.entity];
+            if (es) {
+              this._triggerStates.set(key, {
+                state: es.state,
+                attribute_state: alert.attribute
+                  ? String(this._resolveAttrPath(es.attributes, alert.attribute) ?? "")
+                  : null,
+                ts: Date.now(),
+              });
+              _triggerStatesChanged = true;
+            }
+          }
           if (!this._initialLoadDone) {
             // First load — record only if not already recorded recently (reload dedup)
             const recentlySeen = this._history.some(
@@ -2181,21 +2197,6 @@ class AlertTickerCard extends LitElement {
             if (this._config?.overlay_mode && this._mounted) {
               const dedupeKey = "e:" + (alert.entity || alert.entity_filter || alert.device_class || "") + ":" + (alert._configIdx ?? 0);
               _ATC_OVERLAY.suppress(dedupeKey);
-            }
-          }
-          // Capture trigger state snapshot for {trigger_state}/{trigger_attribute}/{trigger_time}
-          // placeholders (only for newly firing alerts, not on every render)
-          if (alert.entity && this._hass && !this._triggerStates.has(key)) {
-            const es = this._hass.states[alert.entity];
-            if (es) {
-              this._triggerStates.set(key, {
-                state: es.state,
-                attribute_state: alert.attribute
-                  ? String(this._resolveAttrPath(es.attributes, alert.attribute) ?? "")
-                  : null,
-                ts: Date.now(),
-              });
-              _triggerStatesChanged = true;
             }
           }
         }

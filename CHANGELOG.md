@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.9.9.3] - 2026-08-22
+
+### Fixed
+
+- **`{trigger_state}` / `{trigger_time}` empty in history entries** ([#204](https://github.com/djdevil/AlertTicker-Card/issues/204)) — the trigger-state snapshot was captured *after* `_recordHistory()` ran, so history entries and TTS/push messages resolved with empty `{trigger_time}` and a fallback `{trigger_state}` equal to the current state. Snapshot capture is now performed **before** history/TTS/push are triggered, so all downstream consumers see the correct fire-time values.
+
+---
+
 ## [1.3.9.9.2] - 2026-08-22
 
 ### Added
