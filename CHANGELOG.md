@@ -6,6 +6,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.9.9.2] - 2026-08-22
+
+### Added
+
+- **`{trigger_state}` / `{trigger_attribute}` / `{trigger_time}` message placeholders** ([#204](https://github.com/djdevil/AlertTicker-Card/issues/204)) — records the entity state at the moment an alert first fires and keeps it available for the whole life of the alert. Especially useful for **persistent alerts**: the underlying sensor can return to normal but the message still shows what actually triggered it. Snapshots persist to `localStorage` so they survive page reloads, and are automatically cleared when the alert becomes inactive.
+  ```yaml
+  - entity: sensor.status
+    operator: '!='
+    state: 'ok'
+    persistent: true
+    message: '⚠️ Was {trigger_state} at {trigger_time}, now {state}'
+  ```
+
+---
+
 ## [1.3.9.9.1] - 2026-08-21
 
 ### Housekeeping (no functional changes)

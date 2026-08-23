@@ -755,7 +755,11 @@ Instead of specifying a single entity, write a text filter. The card finds all e
 | `{entity}` | Entity ID |
 | `{state}` | Current state value (translated) |
 | `{device}` | HA device name from the device registry |
+| `{area}` | HA area name (from entity or device area assignment) |
 | `{timer}` | Live countdown for `timer.*` entities (`mm:ss` / `h:mm:ss`) |
+| `{trigger_state}` | State the entity had when the alert **first fired** — useful for `persistent: true` alerts where the sensor may return to normal while the alert stays visible |
+| `{trigger_attribute}` | Attribute value at fire time (only when `attribute:` is set) |
+| `{trigger_time}` | Local time string of when the alert first fired |
 
 The matched entity's friendly name is also automatically shown below the message so you always know which device triggered the alert.
 

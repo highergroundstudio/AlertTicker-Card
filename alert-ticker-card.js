@@ -1,5 +1,5 @@
 ﻿/**
- * AlertTicker Card v1.3.9.9.1
+ * AlertTicker Card v1.3.9.9.2
  * A Home Assistant custom Lovelace card to display alerts based on entity states.
  * Supports 50 visual themes with per-alert theme assignment, priority ordering,
  * fold animation cycling, snooze, numeric conditions, attribute triggers,
@@ -41,7 +41,7 @@ const css = LitElement.prototype.css ?? ((strings, ...values) => {
 // ---------------------------------------------------------------------------
 // Card version — declared early so getConfigElement() can reference it
 // ---------------------------------------------------------------------------
-const CARD_VERSION = "1.3.9.9.1";
+const CARD_VERSION = "1.3.9.9.2";
 
 // ---------------------------------------------------------------------------
 // Google Cast compatibility (#171)
@@ -1725,6 +1725,7 @@ class AlertTickerCard extends LitElement {
     this._snoozed    = new Map(); // snoozeKey → expiry timestamp
     this._dismissed  = new Map(); // snoozeKey → last_changed when dismissed
     this._persistentLatched = new Set(); // snoozeKey → latched persistent alert
+    this._triggerStates = new Map();     // snoozeKey → { state, attribute_state, ts } — snapshot at fire time
     this._expandedGroups = new Set(); // groupKey → expanded (shows individual slides)
     this._historyOpen = false;
     this._history = []; // { ts, message, theme, icon, entity }
@@ -2157,8 +2158,10 @@ class AlertTickerCard extends LitElement {
       const prevKeys = new Set(this._activeAlerts.map((a) => this._snoozeKey(a)));
       const now = Date.now();
       let _overlayShown = false;
+      let _triggerStatesChanged = false;
       active.forEach((alert) => {
-        if (!prevKeys.has(this._snoozeKey(alert))) {
+        const key = this._snoozeKey(alert);
+        if (!prevKeys.has(key)) {
           if (!this._initialLoadDone) {
             // First load — record only if not already recorded recently (reload dedup)
             const recentlySeen = this._history.some(
@@ -2180,8 +2183,32 @@ class AlertTickerCard extends LitElement {
               _ATC_OVERLAY.suppress(dedupeKey);
             }
           }
+          // Capture trigger state snapshot for {trigger_state}/{trigger_attribute}/{trigger_time}
+          // placeholders (only for newly firing alerts, not on every render)
+          if (alert.entity && this._hass && !this._triggerStates.has(key)) {
+            const es = this._hass.states[alert.entity];
+            if (es) {
+              this._triggerStates.set(key, {
+                state: es.state,
+                attribute_state: alert.attribute
+                  ? String(this._resolveAttrPath(es.attributes, alert.attribute) ?? "")
+                  : null,
+                ts: Date.now(),
+              });
+              _triggerStatesChanged = true;
+            }
+          }
         }
       });
+      // Cleanup: drop trigger snapshots for alerts that are no longer active
+      const _activeKeys = new Set(active.map((a) => this._snoozeKey(a)));
+      for (const k of this._triggerStates.keys()) {
+        if (!_activeKeys.has(k)) {
+          this._triggerStates.delete(k);
+          _triggerStatesChanged = true;
+        }
+      }
+      if (_triggerStatesChanged) this._saveTriggerStates();
     }
     this._initialLoadDone = true;
 
@@ -3173,6 +3200,17 @@ class AlertTickerCard extends LitElement {
       const { remainingStr } = this._getTimerData(alert);
       msg = msg.replace(/\{timer\}/g, remainingStr);
     }
+    // {trigger_state}/{trigger_attribute}/{trigger_time} — state snapshot at the moment
+    // the alert first fired. Useful for persistent alerts (#204): the sensor may return
+    // to normal but the message still shows what actually triggered it.
+    if (msg.includes("{trigger_state}") || msg.includes("{trigger_attribute}") || msg.includes("{trigger_time}")) {
+      const key = this._snoozeKey(alert);
+      const snap = this._triggerStates.get(key);
+      msg = msg
+        .replace(/\{trigger_state\}/g, snap?.state ?? (alert.entity ? (this._hass?.states[alert.entity]?.state ?? "") : ""))
+        .replace(/\{trigger_attribute\}/g, snap?.attribute_state ?? "")
+        .replace(/\{trigger_time\}/g, snap?.ts ? new Date(snap.ts).toLocaleTimeString(this._lang || undefined) : "");
+    }
     // {state}, {name}, {entity}, {device}, {area} — live entity values (for messages without {{ }})
     if (alert.entity && this._hass && (msg.includes("{state}") || msg.includes("{name}") || msg.includes("{entity}") || msg.includes("{device}") || msg.includes("{area}"))) {
       const es = this._hass.states[alert.entity];
@@ -3396,6 +3434,28 @@ class AlertTickerCard extends LitElement {
   _savePersistent() {
     try {
       localStorage.setItem("atc-persistent", JSON.stringify([...this._persistentLatched]));
+    } catch (_) {}
+  }
+
+  // ---- Trigger-state snapshot helpers ---------------------------------------
+  // Records the entity state at the moment an alert first became active, so the
+  // {trigger_state} placeholder can reference it even after the entity state
+  // changes (useful for persistent alerts that stay visible while the sensor
+  // returns to normal).
+
+  _loadTriggerStates() {
+    try {
+      const raw = localStorage.getItem("atc-trigger-states");
+      if (!raw) return;
+      this._triggerStates = new Map(Object.entries(JSON.parse(raw)));
+    } catch (_) {
+      this._triggerStates = new Map();
+    }
+  }
+
+  _saveTriggerStates() {
+    try {
+      localStorage.setItem("atc-trigger-states", JSON.stringify(Object.fromEntries(this._triggerStates)));
     } catch (_) {}
   }
 
@@ -4261,6 +4321,7 @@ class AlertTickerCard extends LitElement {
     this._loadSnooze();
     this._loadDismissed();
     this._loadPersistent();
+    this._loadTriggerStates();
     this._loadHistory();
     this._startCycleTimer();
     this._startTimerTick();
