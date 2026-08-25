@@ -1,6 +1,10 @@
 ﻿<h1 align="center">AlertTicker Card for Home Assistant</h1>
 
 <p align="center">
+  <img src="images/logoreadme-400.png" alt="AlertTicker Card logo for Home Assistant Lovelace" width="260">
+</p>
+
+<p align="center">
   <strong>The most complete alert & notification card for Home Assistant Lovelace dashboards</strong><br>
   52 visual themes, TTS voice announcements, push notifications, global overlay banner, media player mode, weather forecast widget, and a full visual editor. Zero YAML required.
 </p>
