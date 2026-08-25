@@ -2,17 +2,17 @@
 
 ## 🎉 What's new
 
-### 🔔 Notifiche push potenziate — azioni, suoni personalizzati, allarmi critici
+### 🔔 Push notifications, now with actions, custom sounds & critical alerts
 
-Ora ogni alert può inviare notifiche push con **pulsanti di azione**, **suoni personalizzati**, **allarmi critici** (che bypassano la modalità silenziosa e Non Disturbare) e molto altro.
+Every alert can now send push notifications with **action buttons**, **custom sounds**, **critical alerts** (which bypass silent mode & Do Not Disturb), and much more.
 
-**Esempio pratico:** ricevi una notifica sul telefono con due pulsanti — "Spegni Luce" e "Apri Camera" — e puoi agire senza aprire Home Assistant.
+**Real-world example:** you get a notification on your phone with two buttons — "Turn Off Light" and "Open Camera" — and you can act on it without even opening Home Assistant.
 
 ```yaml
 push_notify: true
 push_notify_service: mobile_app_iphone
 push_notify_title: '💡 Studio'
-push_notify_message: 'Luce accesa da {trigger_time}'
+push_notify_message: 'Light on since {trigger_time}'
 push_notify_data:
   push:
     sound:
@@ -22,52 +22,54 @@ push_notify_data:
     interruption-level: critical
   actions:
     - action: TURN_OFF_LIGHT
-      title: 🔌 Spegni
+      title: 🔌 Turn Off
       destructive: true
     - action: URI
-      title: 📸 Vedi Camera
+      title: 📸 View Camera
       uri: /lovelace/cameras
 ```
 
-Tutto è configurabile anche dall'editor visuale — c'è un nuovo campo YAML dentro ogni alert nella sezione "Notifica Push".
+Everything is configurable from the **visual editor** too — a new YAML field appears inside each alert under the "Push notification" section.
+
+Full README example includes a matching HA automation for handling the action button tap.
 
 ---
 
-### ⚠️ Nuovo avviso: le notifiche funzionano solo con Home Assistant aperto
+### ⚠️ New reminder: notifications need HA open in a browser
 
-Aggiunto un promemoria arancione nell'editor (accanto ai toggle TTS e Push) e nel README per chiarire che **TTS, notifiche push e sound funzionano solo mentre almeno una scheda del browser ha Home Assistant aperto** (desktop, tablet fisso, o app Companion in primo piano).
+Added an amber notice in the editor (next to both the TTS and Push toggles) and in the README to make it clear that **TTS, push notifications, and sounds only fire while at least one browser tab has Home Assistant open** (desktop, wall tablet, or the HA Companion app in the foreground).
 
-Per allarmi critici 24/7 (fumo, sicurezza, allagamenti) la scelta giusta resta sempre creare un'**automazione HA lato server**.
+For 24/7 critical alerts (smoke, security, water leaks…) the right choice is still a **server-side HA automation**. The card's push/TTS is best used as a convenience layer on top.
 
-Tradotto in tutte e 12 le lingue supportate.
+Translated to all 12 supported languages.
 
 ---
 
-### 🎨 Nuovo controllo bordo severità (grazie a [@sriramsv](https://github.com/sriramsv))
+### 🎨 New severity border control (thanks to [@sriramsv](https://github.com/sriramsv))
 
-Con `ha_theme: true` ogni alert riceve un bordo colorato in base alla severità (rosso critical, arancione warning, blu info, verde ok). Ora c'è un toggle per **disattivarlo** mantenendo colorati badge e icone.
+With `ha_theme: true`, each alert gets a coloured border based on its severity (red critical, orange warning, blue info, green ok). There's now a toggle to **disable it** while keeping the coloured badges and icons.
 
 ```yaml
 severity_border: false
 ```
 
-Utile per chi vuole un look più "flat" senza perdere il codice colore.
+Great for users who want a flatter look without losing the colour coding.
 
 ---
 
-## 📥 Come aggiornare
+## 📥 How to upgrade
 
-- **Via HACS:** apri HACS → Frontend → AlertTicker Card → Aggiorna
-- **Manuale:** sostituisci i file `alert-ticker-card.js` e `alert-ticker-card-editor.js`
+- **Via HACS:** open HACS → Frontend → AlertTicker Card → Update
+- **Manual:** replace `alert-ticker-card.js` and `alert-ticker-card-editor.js`
 
-Dopo l'aggiornamento, **svuota la cache del browser** (`Ctrl+F5`) per vedere subito le novità.
+After updating, **clear your browser cache** (`Ctrl+F5`) so you see the new features right away.
 
 ---
 
-## 🙏 Grazie
+## 🙏 Thanks
 
-Un grazie speciale a [@ShaneYu](https://github.com/ShaneYu) per aver proposto la feature `push_notify_data` ([#207](https://github.com/djdevil/AlertTicker-Card/issues/207)) e a [@sriramsv](https://github.com/sriramsv) per il contributo su `severity_border` ([#206](https://github.com/djdevil/AlertTicker-Card/pull/206)).
+Special thanks to [@ShaneYu](https://github.com/ShaneYu) for suggesting the `push_notify_data` feature ([#207](https://github.com/djdevil/AlertTicker-Card/issues/207)) and to [@sriramsv](https://github.com/sriramsv) for the `severity_border` contribution ([#206](https://github.com/djdevil/AlertTicker-Card/pull/206)).
 
-Se questa card ti è utile e ti fa risparmiare tempo, considera di offrirmi un caffè — è il modo migliore per sostenere lo sviluppo continuo. ☕
+If this card is useful and saves you time, consider buying me a coffee — it's the best way to support continued development. ☕
 
 [![Buy Me A Coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/divil17f)
