@@ -6,6 +6,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.9.9.4] - 2026-08-25
+
+### Added
+
+- **`push_notify_data` per-alert option** ([#207](https://github.com/djdevil/AlertTicker-Card/issues/207)) — arbitrary payload passed through to the `notify.*` service under the `data` key. Enables actionable notifications, critical alerts (bypass DND), custom push sounds, attachments, tags/grouping, and any other feature supported by the HA Companion apps. String values inside the payload are template-resolved by the card's usual message renderer, so `{state}`, `{name}`, `{trigger_state}` and full Jinja2 (`{{ ... }}`) all work inside actions/titles.
+  ```yaml
+  - entity: switch.master_ensuite_fan
+    state: 'on'
+    push_notify: true
+    push_notify_service: mobile_app_john
+    push_notify_title: 'Master en-suite fan'
+    push_notify_message: 'Fan left running in {area}'
+    push_notify_data:
+      push:
+        sound:
+          name: Bloom.caf
+          volume: 1
+        interruption-level: time-sensitive
+      actions:
+        - action: TURN_OFF_MASTER_ENSUITE_FAN
+          title: Turn Off Fan
+          destructive: true
+      tag: alert_master_ensuite_fan
+  ```
+  Editor: freeform YAML editor added to the Push notification section of each alert. Empty payload is normalised to `undefined` (no `data:` key emitted).
+- **`severity_border` card-level option** ([#206](https://github.com/djdevil/AlertTicker-Card/pull/206) by [@sriramsv](https://github.com/sriramsv)) — new toggle (default `true`) to disable the 1px severity-colored border drawn around each alert block in `ha_theme` mode, while keeping the badge/icon color coding intact. The border width is also exposed as a `--atc-severity-border-width` CSS custom property for theme-level control (e.g. `atc-severity-border-width: "2px"` in a theme file). The card-level `severity_border: false` always wins over the theme variable. Toggle added to the visual editor next to `card_border`.
+
+### Changed
+
+- **Client-side limitation warning** — README (TTS + Push Notifications sections) and visual editor (both master toggles and per-alert TTS/Push toggles) now explicitly state that these features fire from the browser and require a Home Assistant tab to be open. For 24/7 critical alerts users are directed to server-side HA automations. Translated for all 12 supported languages.
+
+---
+
 ## [1.3.9.9.3] - 2026-08-22
 
 ### Fixed

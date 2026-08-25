@@ -167,6 +167,8 @@ A big thank you to **[SmartHomeJunkie](https://www.youtube.com/@SmartHomeJunkie)
 
 Make Home Assistant read your alerts aloud the moment they trigger — on any speaker, Alexa Echo device, or Google Home.
 
+> ⚠️ **Client-side limitation:** TTS is fired by the card itself, which runs in the browser. It works **only while at least one browser tab has Home Assistant open** (desktop, wall tablet, or the HA Companion app running in the foreground). For 24/7 unattended TTS announcements on critical events, use a **server-side HA automation** with the same `notify.alexa_media_*` / `tts.speak` service call.
+
 ```yaml
 # Standard HA TTS (media_player + TTS engine)
 alerts:
@@ -232,6 +234,8 @@ Per-alert fields override global card-level defaults, so you can have one speake
 
 Send a push notification to any Home Assistant `notify.*` service the moment an alert fires — works with the HA Companion App, Telegram, Pushover, and any other notify integration.
 
+> ⚠️ **Client-side limitation:** push notifications are fired by the card, which runs in the browser. They work **only while at least one browser tab has Home Assistant open** (desktop, wall tablet, or the HA Companion app running in the foreground). If nobody is looking at HA at 3 am, no push will be sent even if a sensor triggers. For 24/7 critical alerts (smoke, security, water leak, …), always create a **server-side HA automation** that calls the same `notify.*` service — the card push is best used as a convenience layer on top.
+
 ```yaml
 alerts:
   - entity: binary_sensor.front_door
@@ -260,6 +264,51 @@ alerts:
 | `push_notify_service` | `string` | `notify.*` service name (e.g. `mobile_app_my_phone`, `notify.telegram`) |
 | `push_notify_title` | `string` | Notification title — Jinja2, defaults to badge label |
 | `push_notify_message` | `string` | Notification message — Jinja2, defaults to alert message |
+| `push_notify_data` | `object` | **New in 1.3.9.9.4** — arbitrary payload passed through to the `notify.*` service under the `data` key. Enables actionable notifications, critical alerts (bypass DND), custom push sounds, attachments, tag/group. String values are template-resolved (see example below). |
+
+### Actionable & critical push notifications *(new in 1.3.9.9.4)*
+
+Use `push_notify_data` to unlock every feature the HA Companion apps and other notify integrations support:
+
+```yaml
+- entity: switch.master_ensuite_fan
+  state: 'on'
+  push_notify: true
+  push_notify_service: mobile_app_john
+  push_notify_title: '💨 Master en-suite fan'
+  push_notify_message: 'Fan left running in {area}'
+  push_notify_data:
+    push:
+      sound:
+        name: Bloom.caf
+        volume: 1
+      interruption-level: time-sensitive   # iOS: bypass focus modes
+    actions:
+      - action: TURN_OFF_MASTER_ENSUITE_FAN
+        title: Turn Off Fan
+        destructive: true
+      - action: URI
+        title: Open Camera
+        uri: /lovelace/cameras
+    tag: alert_master_ensuite_fan          # replace previous notification with same tag
+    group: bathroom                        # Android: notification group
+```
+
+String values inside `push_notify_data` are template-resolved by the card's usual renderer, so `{state}`, `{name}`, `{area}`, `{trigger_state}` and full Jinja2 `{{ ... }}` work inside actions/titles/URIs.
+
+Handle the `action` returned by the user in a server-side automation:
+
+```yaml
+- alias: 'Turn off master en-suite fan from push action'
+  trigger:
+    platform: event
+    event_type: mobile_app_notification_action_received
+    event_data:
+      action: TURN_OFF_MASTER_ENSUITE_FAN
+  action:
+    service: switch.turn_off
+    target: { entity_id: switch.master_ensuite_fan }
+```
 
 ---
 

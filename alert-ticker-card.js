@@ -1,5 +1,5 @@
 ﻿/**
- * AlertTicker Card v1.3.9.9.3
+ * AlertTicker Card v1.3.9.9.4
  * A Home Assistant custom Lovelace card to display alerts based on entity states.
  * Supports 50 visual themes with per-alert theme assignment, priority ordering,
  * fold animation cycling, snooze, numeric conditions, attribute triggers,
@@ -41,7 +41,7 @@ const css = LitElement.prototype.css ?? ((strings, ...values) => {
 // ---------------------------------------------------------------------------
 // Card version — declared early so getConfigElement() can reference it
 // ---------------------------------------------------------------------------
-const CARD_VERSION = "1.3.9.9.3";
+const CARD_VERSION = "1.3.9.9.4";
 
 // ---------------------------------------------------------------------------
 // Google Cast compatibility (#171)
@@ -3628,12 +3628,36 @@ class AlertTickerCard extends LitElement {
       ? this._resolveMessage({ ...alert, message: alert.push_notify_message })
       : this._resolveMessage(alert);
     if (!message) return;
+    // Optional extra payload — actions, sound, critical, attachments, etc.
+    // Passed through as-is to the notify service (see #207). String values
+    // are shallow-scanned for {state}/{{...}} template patterns so users can
+    // include dynamic values inside actions without extra config.
+    const data = this._resolvePushNotifyData(alert.push_notify_data, alert);
     try {
       this._hass.callService("notify", notifyService, {
         ...(title ? { title } : {}),
         message,
+        ...(data ? { data } : {}),
       });
     } catch (_) {}
+  }
+
+  /** Deep-clones push_notify_data and resolves message-style placeholders inside string values. */
+  _resolvePushNotifyData(data, alert) {
+    if (data == null || typeof data !== "object") return null;
+    const walk = (v) => {
+      if (typeof v === "string") {
+        return v.includes("{") ? this._resolveMessage({ ...alert, message: v }) : v;
+      }
+      if (Array.isArray(v)) return v.map(walk);
+      if (v && typeof v === "object") {
+        const out = {};
+        for (const k of Object.keys(v)) out[k] = walk(v[k]);
+        return out;
+      }
+      return v;
+    };
+    return walk(data);
   }
 
   _playAlertSound(alert) {
