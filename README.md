@@ -1,17 +1,24 @@
-﻿# 🔔 AlertTicker Card for Home Assistant
+﻿<h1 align="center">AlertTicker Card for Home Assistant</h1>
 
-> **The most complete alert & notification card for Home Assistant Lovelace dashboards** — 52 visual themes, TTS voice announcements, push notifications, global overlay banner, media player mode, weather forecast widget, and a full visual editor. Zero YAML required.
+<p align="center">
+  <strong>The most complete alert & notification card for Home Assistant Lovelace dashboards</strong><br>
+  52 visual themes, TTS voice announcements, push notifications, global overlay banner, media player mode, weather forecast widget, and a full visual editor. Zero YAML required.
+</p>
 
-[![HACS](https://img.shields.io/badge/HACS-Custom-orange.svg?logo=home-assistant)](https://github.com/custom-components/hacs)
-[![Version](https://img.shields.io/github/v/release/djdevil/AlertTicker-Card?color=blue&label=version)](https://github.com/djdevil/AlertTicker-Card/releases/latest)
-[![HACS Action](https://github.com/djdevil/AlertTicker-Card/actions/workflows/hacs.yml/badge.svg)](https://github.com/djdevil/AlertTicker-Card/actions/workflows/hacs.yml)
-[![Downloads](https://img.shields.io/github/downloads/djdevil/AlertTicker-Card/total?color=brightgreen&label=downloads)](https://github.com/djdevil/AlertTicker-Card/releases)
-[![Stars](https://img.shields.io/github/stars/djdevil/AlertTicker-Card?color=yellow&label=stars)](https://github.com/djdevil/AlertTicker-Card/stargazers)
-[![License](https://img.shields.io/github/license/djdevil/AlertTicker-Card?color=lightgrey)](LICENSE)
-[![Discussions](https://img.shields.io/github/discussions/djdevil/AlertTicker-Card?color=blueviolet&label=discussions)](https://github.com/djdevil/AlertTicker-Card/discussions)
-[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-support-yellow.svg?logo=buy-me-a-coffee)](https://www.buymeacoffee.com/divil17f)
+<p align="center">
+  <a href="https://github.com/custom-components/hacs"><img src="https://img.shields.io/badge/HACS-Custom-orange.svg?logo=home-assistant" alt="HACS"></a>
+  <a href="https://github.com/djdevil/AlertTicker-Card/releases/latest"><img src="https://img.shields.io/github/v/release/djdevil/AlertTicker-Card?color=blue&label=version" alt="Version"></a>
+  <a href="https://github.com/djdevil/AlertTicker-Card/actions/workflows/hacs.yml"><img src="https://github.com/djdevil/AlertTicker-Card/actions/workflows/hacs.yml/badge.svg" alt="HACS Action"></a>
+  <a href="https://github.com/djdevil/AlertTicker-Card/releases"><img src="https://img.shields.io/github/downloads/djdevil/AlertTicker-Card/total?color=brightgreen&label=downloads" alt="Downloads"></a>
+  <a href="https://github.com/djdevil/AlertTicker-Card/stargazers"><img src="https://img.shields.io/github/stars/djdevil/AlertTicker-Card?color=yellow&label=stars" alt="Stars"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/djdevil/AlertTicker-Card?color=lightgrey" alt="License"></a>
+  <a href="https://github.com/djdevil/AlertTicker-Card/discussions"><img src="https://img.shields.io/github/discussions/djdevil/AlertTicker-Card?color=blueviolet&label=discussions" alt="Discussions"></a>
+  <a href="https://www.buymeacoffee.com/divil17f"><img src="https://img.shields.io/badge/Buy%20Me%20A%20Coffee-support-yellow.svg?logo=buy-me-a-coffee" alt="Buy Me A Coffee"></a>
+</p>
 
-[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=djdevil&repository=AlertTicker-Card&category=plugin)
+<p align="center">
+  <a href="https://my.home-assistant.io/redirect/hacs_repository/?owner=djdevil&repository=AlertTicker-Card&category=plugin"><img src="https://my.home-assistant.io/badges/hacs_repository.svg" alt="Open your Home Assistant instance and open a repository inside the Home Assistant Community Store."></a>
+</p>
 
 ---
 
