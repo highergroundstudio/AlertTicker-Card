@@ -6,6 +6,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.9.9.5] - 2026-08-26
+
+### Fixed
+
+- **Broken separator between marquee repetitions in `secondary_entity` display** ([#209](https://github.com/djdevil/AlertTicker-Card/issues/209)) — the separator between the two copies of the scrolling text was three Unicode Replacement Characters (`U+FFFD U+FFFD U+FFFD`) instead of the intended three non-breaking spaces (`U+00A0 U+00A0 U+00A0`). Chrome/Firefox/Safari rendered them as empty glyph placeholders (`�`). The source file has been repaired — the marquee now shows a clean invisible gap between the two copies of long secondary values.
+
+### Added
+
+- **Cross-device snooze / dismiss sync** ([#210](https://github.com/djdevil/AlertTicker-Card/issues/210)) — snoozing, dismissing, or clearing a persistent alert on one display now propagates in real time to every other browser/tab/device connected to the same Home Assistant instance. Wall panels, laptops, and mobile Companion instances stay in sync automatically — no config required, no helpers to create. Uses HA's WebSocket event bus (`alertticker_sync` events with a per-tab device ID to prevent self-echo).
+- **Action confirmation prompt** ([#211](https://github.com/djdevil/AlertTicker-Card/issues/211)) — `tap_action`, `hold_action`, `double_tap_action`, `snooze_action`, and card-level `clear_*_action` now support the HA-native `confirmation` field. When set, a browser confirmation dialog appears before the action runs — perfect for destructive operations like disarming an alarm or unlocking doors. Accepts both the short form (`confirmation: true`, uses a default English prompt) and the full object form (`confirmation: { text: "…", exemptions: [{ user: "userId" }] }`).
+  ```yaml
+  tap_action:
+    action: call-service
+    service: alarm_control_panel.alarm_disarm
+    target:
+      entity_id: alarm_control_panel.home
+    confirmation:
+      text: "Are you sure you want to disarm the alarm?"
+  ```
+  Editor: every action section (tap / hold / double-tap / snooze / clear) now shows an **Ask for confirmation** toggle. When enabled, an optional text field lets you override the default prompt. Translated to all 12 supported languages.
+
+---
+
 ## [1.3.9.9.4] - 2026-08-25
 
 ### Added

@@ -1,5 +1,5 @@
 ﻿/**
- * AlertTicker Card v1.3.9.9.4
+ * AlertTicker Card v1.3.9.9.5
  * A Home Assistant custom Lovelace card to display alerts based on entity states.
  * Supports 50 visual themes with per-alert theme assignment, priority ordering,
  * fold animation cycling, snooze, numeric conditions, attribute triggers,
@@ -41,7 +41,7 @@ const css = LitElement.prototype.css ?? ((strings, ...values) => {
 // ---------------------------------------------------------------------------
 // Card version — declared early so getConfigElement() can reference it
 // ---------------------------------------------------------------------------
-const CARD_VERSION = "1.3.9.9.4";
+const CARD_VERSION = "1.3.9.9.5";
 
 // ---------------------------------------------------------------------------
 // Google Cast compatibility (#171)
@@ -1726,6 +1726,8 @@ class AlertTickerCard extends LitElement {
     this._dismissed  = new Map(); // snoozeKey → last_changed when dismissed
     this._persistentLatched = new Set(); // snoozeKey → latched persistent alert
     this._triggerStates = new Map();     // snoozeKey → { state, attribute_state, ts } — snapshot at fire time
+    this._syncUnsubPromise = null;       // WebSocket subscription handle for alertticker_sync events
+    this._deviceId = Math.random().toString(36).slice(2) + Date.now().toString(36); // per-tab unique ID (issue #210)
     this._expandedGroups = new Set(); // groupKey → expanded (shows individual slides)
     this._historyOpen = false;
     this._history = []; // { ts, message, theme, icon, entity }
@@ -3414,8 +3416,10 @@ class AlertTickerCard extends LitElement {
     if (!alert || !alert.entity) return;
     const es = this._hass && this._hass.states[alert.entity];
     if (!es) return;
-    this._dismissed.set(this._snoozeKey(alert), es.last_changed);
+    const key = this._snoozeKey(alert);
+    this._dismissed.set(key, es.last_changed);
     this._saveDismissed();
+    this._fireSyncEvent("dismiss", { key, lsc: es.last_changed });
     this._lastSignature = "";
     this._computeActiveAlerts();
   }
@@ -3461,13 +3465,109 @@ class AlertTickerCard extends LitElement {
   }
 
   _dismissPersistent(alert) {
-    this._persistentLatched.delete(this._snoozeKey(alert));
+    const key = this._snoozeKey(alert);
+    this._persistentLatched.delete(key);
     this._savePersistent();
+    this._fireSyncEvent("persistent_dismiss", { key });
     this._snoozeMenuOpen = null;
     // Use a sentinel that won't match "" (empty active list) so _computeActiveAlerts
     // doesn't early-return when the dismissed alert was the only one active.
     this._lastSignature = "__dismiss__";
     this._computeActiveAlerts();
+  }
+
+  // ---- Cross-device sync (issue #210) ---------------------------------------
+  // Snooze/dismiss/persistent state is stored in localStorage, which is
+  // per-browser/per-device. When the user has multiple displays (wall panels,
+  // laptops, mobiles) an ack on one device wouldn't propagate to the others.
+  // We use HA's WebSocket event bus to broadcast state changes to all
+  // connected instances in real time. Events include a deviceId so a card
+  // never processes its own broadcast.
+
+  _subscribeSyncEvents() {
+    if (!this._hass?.connection) return;
+    // Cancel any previous subscription to avoid duplicates on reconnect
+    this._unsubscribeSyncEvents();
+    try {
+      this._syncUnsubPromise = this._hass.connection.subscribeEvents(
+        (event) => this._handleSyncEvent(event),
+        "alertticker_sync"
+      );
+    } catch (_) {}
+  }
+
+  _unsubscribeSyncEvents() {
+    if (!this._syncUnsubPromise) return;
+    Promise.resolve(this._syncUnsubPromise)
+      .then((unsub) => { try { unsub && unsub(); } catch (_) {} })
+      .catch(() => {});
+    this._syncUnsubPromise = null;
+  }
+
+  /** Fire an ack broadcast for other card instances on other devices. */
+  _fireSyncEvent(action, payload = {}) {
+    if (!this._hass?.connection) return;
+    try {
+      this._hass.callWS({
+        type: "fire_event",
+        event_type: "alertticker_sync",
+        event_data: {
+          deviceId: this._deviceId,
+          action,
+          ...payload,
+        },
+      }).catch(() => {}); // silent on permission errors
+    } catch (_) {}
+  }
+
+  /** Apply an incoming ack from another device. */
+  _handleSyncEvent(event) {
+    const data = event?.data;
+    if (!data || !data.action) return;
+    if (data.deviceId === this._deviceId) return; // ignore self-echo
+
+    let changed = false;
+    switch (data.action) {
+      case "snooze":
+        if (data.key && data.expiry) {
+          this._snoozed.set(data.key, data.expiry);
+          this._saveSnooze();
+          changed = true;
+        }
+        break;
+      case "unsnooze":
+        if (data.key && this._snoozed.has(data.key)) {
+          this._snoozed.delete(data.key);
+          this._saveSnooze();
+          changed = true;
+        }
+        break;
+      case "dismiss":
+        if (data.key && data.lsc) {
+          this._dismissed.set(data.key, data.lsc);
+          this._saveDismissed();
+          changed = true;
+        }
+        break;
+      case "undismiss_all":
+        if (this._dismissed.size > 0) {
+          this._dismissed.clear();
+          this._saveDismissed();
+          changed = true;
+        }
+        break;
+      case "persistent_dismiss":
+        if (data.key && this._persistentLatched.has(data.key)) {
+          this._persistentLatched.delete(data.key);
+          this._savePersistent();
+          changed = true;
+        }
+        break;
+    }
+    if (changed) {
+      this._lastSignature = "__sync__";
+      this._computeActiveAlerts();
+    }
   }
 
   // ---- History helpers ------------------------------------------------------
@@ -3744,8 +3844,10 @@ class AlertTickerCard extends LitElement {
    */
   _snoozeAlert(alert, durationH) {
     const expiry = Date.now() + durationH * 3_600_000;
-    this._snoozed.set(this._snoozeKey(alert), expiry);
+    const key = this._snoozeKey(alert);
+    this._snoozed.set(key, expiry);
     this._saveSnooze();
+    this._fireSyncEvent("snooze", { key, expiry });
     this._snoozeMenuOpen = null;
     // Re-check at expiry so the alert reappears without needing an entity update
     setTimeout(() => {
@@ -4029,6 +4131,24 @@ class AlertTickerCard extends LitElement {
   _handleAction(cfg) {
     if (!cfg || !cfg.action || cfg.action === "none") return;
     if (cfg.action === "_expand_group") { this._expandGroup(this._current); return; }
+
+    // Confirmation (issue #211) — HA-native `confirmation` field support.
+    // Accepts either `confirmation: true` (default text) or the full object
+    // form `confirmation: { text: "...", exemptions: [{ user: "id" }] }`.
+    if (cfg.confirmation) {
+      const conf = cfg.confirmation;
+      const isObj = typeof conf === "object";
+      const currentUserId = this._hass?.user?.id;
+      const isExempt = isObj && Array.isArray(conf.exemptions)
+        && conf.exemptions.some((e) => e && e.user === currentUserId);
+      if (!isExempt) {
+        const text = (isObj && conf.text)
+          ? conf.text
+          : "Are you sure you want to execute this action?";
+        if (!window.confirm(text)) return;
+      }
+    }
+
     switch (cfg.action) {
       case "call-service": {
         if (!cfg.service || !this._hass) return;
@@ -4263,6 +4383,7 @@ class AlertTickerCard extends LitElement {
   _clearAllDismissed() {
     this._dismissed.clear();
     this._saveDismissed();
+    this._fireSyncEvent("undismiss_all");
     this._lastSignature = "";
     this._computeActiveAlerts();
   }
@@ -4348,6 +4469,7 @@ class AlertTickerCard extends LitElement {
     this._loadPersistent();
     this._loadTriggerStates();
     this._loadHistory();
+    this._subscribeSyncEvents();
     this._startCycleTimer();
     this._startTimerTick();
   }
@@ -4362,6 +4484,8 @@ class AlertTickerCard extends LitElement {
       this._snoozeOutsideHandler = null;
     }
     clearTimeout(this._touchButtonsTimer);
+    // Unsubscribe cross-device sync event stream
+    this._unsubscribeSyncEvents();
     // Unsubscribe all render_template WebSocket subscriptions
     for (const unsub of this._tmplUnsubs.values()) { try { unsub(); } catch (_) {} }
     this._tmplUnsubs.clear();
@@ -4553,7 +4677,7 @@ class AlertTickerCard extends LitElement {
           if (_svText.length > 28) {
             const _svDur = Math.max(6, _svText.length * 0.22).toFixed(1);
             lines.push(html`<div class="atc-secondary-value atc-secondary-entity-line atc-sv-marquee-wrap">
-              <span class="atc-sv-marquee-inner" style="animation-duration:${_svDur}s">${_svText}���${_svText}</span>
+              <span class="atc-sv-marquee-inner" style="animation-duration:${_svDur}s">${_svText}   ${_svText}</span>
             </div>`);
           } else {
             lines.push(html`<div class="atc-secondary-value atc-secondary-entity-line">

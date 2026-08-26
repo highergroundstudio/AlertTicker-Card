@@ -1,5 +1,5 @@
 /**
- * AlertTicker Card Editor v1.3.9.9.4
+ * AlertTicker Card Editor v1.3.9.9.5
  * Visual editor for the AlertTicker Card custom Lovelace component.
  */
 
@@ -10,7 +10,7 @@ const html = LitElement.prototype.html;
 const css = LitElement.prototype.css;
 
 // Must match the version in alert-ticker-card.js
-const CARD_VERSION = "1.3.9.9.4";
+const CARD_VERSION = "1.3.9.9.5";
 
 // ---------------------------------------------------------------------------
 // Theme metadata — mirrors alert-ticker-card.js
@@ -1123,6 +1123,10 @@ const ET = {
     action_pipeline_id: "Pipeline (vuoto = predefinita)",
     action_pipeline_id_help: "ID del pipeline vocale da usare. Lascia vuoto per usare quello predefinito.",
     action_start_listening: "Avvia ascolto",
+    action_confirmation: "Chiedi conferma prima di eseguire",
+    action_confirmation_help: "Mostra un dialogo \"Sei sicuro?\" prima di eseguire l'azione. Utile per operazioni distruttive come disarmare l'allarme o sbloccare porte.",
+    action_confirmation_text: "Messaggio del dialogo (opzionale)",
+    action_confirmation_placeholder: "Sei sicuro di voler eseguire questa azione?",
     delete_item: "Elimina",
     section_overlay: "Overlay Notifica 🔔",
     overlay_mode: "Mostra banner overlay quando scatta un avviso",
@@ -1480,6 +1484,10 @@ const ET = {
     action_pipeline_id: "Pipeline (empty = preferred)",
     action_pipeline_id_help: "Voice pipeline ID to use. Leave empty to use the preferred pipeline.",
     action_start_listening: "Start listening",
+    action_confirmation: "Yêu cầu xác nhận",
+    action_confirmation_help: "Hiển thị hộp thoại \"Bạn có chắc không?\" trước khi thực hiện hành động. Hữu ích cho các thao tác phá hoại như tắt báo động hoặc mở khóa cửa.",
+    action_confirmation_text: "Thông báo xác nhận (tùy chọn)",
+    action_confirmation_placeholder: "Bạn có chắc muốn thực hiện hành động này?",
     delete_item: "Delete",
     section_overlay: "Overlay Notification 🔔",
     overlay_mode: "Show overlay banner when an alert triggers",
@@ -1835,6 +1843,10 @@ const ET = {
     action_pipeline_id: "Pipeline (vide = préféré)",
     action_pipeline_id_help: "ID du pipeline vocal à utiliser. Laisser vide pour utiliser le pipeline préféré.",
     action_start_listening: "Démarrer l'écoute",
+    action_confirmation: "Demander confirmation",
+    action_confirmation_help: "Affiche une boîte de dialogue \"Êtes-vous sûr?\" avant d'exécuter l'action. Utile pour les opérations destructives comme désarmer une alarme ou déverrouiller des portes.",
+    action_confirmation_text: "Message de confirmation (facultatif)",
+    action_confirmation_placeholder: "Êtes-vous sûr de vouloir exécuter cette action?",
     delete_item: "Supprimer",
     section_overlay: "Notification Overlay 🔔",
     overlay_mode: "Afficher un banner overlay lorsqu'une alerte se déclenche",
@@ -2190,6 +2202,10 @@ const ET = {
     action_pipeline_id: "Pipeline (leer = bevorzugt)",
     action_pipeline_id_help: "ID der Sprach-Pipeline. Leer lassen für die bevorzugte Pipeline.",
     action_start_listening: "Zuhören starten",
+    action_confirmation: "Bestätigung anfordern",
+    action_confirmation_help: "Zeigt einen \"Sind Sie sicher?\"-Dialog vor der Ausführung der Aktion an. Nützlich für destruktive Vorgänge wie Alarm deaktivieren oder Türen entsperren.",
+    action_confirmation_text: "Bestätigungsnachricht (optional)",
+    action_confirmation_placeholder: "Möchten Sie diese Aktion wirklich ausführen?",
     delete_item: "Löschen",
     section_overlay: "Overlay-Benachrichtigung 🔔",
     overlay_mode: "Overlay-Banner anzeigen wenn ein Alert ausgelöst wird",
@@ -2545,6 +2561,10 @@ const ET = {
     action_pipeline_id: "Pipeline (leeg = voorkeur)",
     action_pipeline_id_help: "ID van de spraakpipeline. Leeg laten voor de standaard pipeline.",
     action_start_listening: "Begin met luisteren",
+    action_confirmation: "Vraag bevestiging",
+    action_confirmation_help: "Toont een \"Weet je het zeker?\"-dialoogvenster voor het uitvoeren van de actie. Nuttig voor destructieve bewerkingen zoals het uitschakelen van een alarm of het ontgrendelen van deuren.",
+    action_confirmation_text: "Bevestigingsbericht (optioneel)",
+    action_confirmation_placeholder: "Weet je zeker dat je deze actie wilt uitvoeren?",
     delete_item: "Verwijderen",
     section_overlay: "Overlay-melding 🔔",
     overlay_mode: "Toon overlay-banner wanneer een melding activeert",
@@ -2900,6 +2920,10 @@ const ET = {
     action_pipeline_id: "Pipeline (trống = mặc định)",
     action_pipeline_id_help: "ID pipeline giọng nói. Để trống để dùng pipeline mặc định.",
     action_start_listening: "Bắt đầu nghe",
+    action_confirmation: "Запрашивать подтверждение",
+    action_confirmation_help: "Показывает диалог \"Вы уверены?\" перед выполнением действия. Полезно для деструктивных операций, таких как снятие сигнализации или разблокировка дверей.",
+    action_confirmation_text: "Сообщение подтверждения (необязательно)",
+    action_confirmation_placeholder: "Вы уверены, что хотите выполнить это действие?",
     delete_item: "Xóa",
     section_overlay: "Thông báo Overlay 🔔",
     overlay_mode: "Hiển thị banner overlay khi có báo động mới",
@@ -3255,6 +3279,10 @@ const ET = {
     action_pipeline_id: "Pipeline (пусто = по умолчанию)",
     action_pipeline_id_help: "ID голосового pipeline. Оставьте пустым для использования pipeline по умолчанию.",
     action_start_listening: "Начать прослушивание",
+    action_confirmation: "Bed om bekræftelse",
+    action_confirmation_help: "Viser en \"Er du sikker?\"-dialog før handlingen udføres. Nyttigt for destruktive operationer såsom at deaktivere en alarm eller låse døre op.",
+    action_confirmation_text: "Bekræftelsesmeddelelse (valgfrit)",
+    action_confirmation_placeholder: "Er du sikker på, at du vil udføre denne handling?",
     delete_item: "Удалить",
     section_overlay: "Оверлей-уведомление 🔔",
     overlay_mode: "Показывать оверлей-баннер при срабатывании оповещения",
@@ -3606,6 +3634,10 @@ const ET = {
     action_pipeline_id: "Pipeline (tom = foretrukket)",
     action_pipeline_id_help: "ID på tale-pipeline. Lad feltet være tomt for at bruge den foretrukne pipeline.",
     action_start_listening: "Start lytning",
+    action_confirmation: "Vyžádat potvrzení",
+    action_confirmation_help: "Zobrazí dialogové okno \"Jste si jistí?\" před provedením akce. Užitečné pro destruktivní operace, jako je deaktivace alarmu nebo odemykání dveří.",
+    action_confirmation_text: "Zpráva potvrzení (volitelné)",
+    action_confirmation_placeholder: "Opravdu chcete provést tuto akci?",
     delete_item: "Slet",
     section_overlay: "Overlay-notifikation 🔔",
     overlay_mode: "Vis overlay-banner, når en advarsel udløses",
@@ -3965,6 +3997,10 @@ const ET = {
     action_pipeline_id: "Pipeline (prázdné = výchozí)",
     action_pipeline_id_help: "ID hlasového pipeline. Nechte prázdné pro použití výchozího pipeline.",
     action_start_listening: "Začít naslouchat",
+    action_confirmation: "Pedir confirmação",
+    action_confirmation_help: "Mostra um diálogo \"Tem certeza?\" antes de executar a ação. Útil para operações destrutivas como desarmar um alarme ou destrancar portas.",
+    action_confirmation_text: "Mensagem de confirmação (opcional)",
+    action_confirmation_placeholder: "Tem certeza de que deseja executar esta ação?",
     delete_item: "Smazat",
     section_overlay: "Překryvné oznámení 🔔",
     overlay_mode: "Zobraz překryvné oznámení při spuštění varování",
@@ -4324,6 +4360,10 @@ const ET = {
     action_pipeline_id: "Pipeline (vazio = padrão)",
     action_pipeline_id_help: "ID do pipeline de voz. Deixe vazio para usar o pipeline padrão.",
     action_start_listening: "Iniciar escuta",
+    action_confirmation: "Pedir confirmación",
+    action_confirmation_help: "Muestra un diálogo \"¿Estás seguro?\" antes de ejecutar la acción. Útil para operaciones destructivas como desarmar una alarma o desbloquear puertas.",
+    action_confirmation_text: "Mensaje de confirmación (opcional)",
+    action_confirmation_placeholder: "¿Seguro que quieres ejecutar esta acción?",
     delete_item: "Excluir",
     section_overlay: "Notificação Overlay 🔔",
     overlay_mode: "Mostrar banner overlay quando um alerta disparar",
@@ -4679,6 +4719,10 @@ const ET = {
     action_pipeline_id: "Pipeline (vacío = predeterminado)",
     action_pipeline_id_help: "ID del pipeline de voz. Dejar vacío para usar el predeterminado.",
     action_start_listening: "Iniciar escucha",
+    action_confirmation: "Onay iste",
+    action_confirmation_help: "Eylemi gerçekleştirmeden önce \"Emin misiniz?\" iletişim kutusunu gösterir. Alarm devre dışı bırakma veya kapıları açma gibi yıkıcı işlemler için yararlıdır.",
+    action_confirmation_text: "Onay mesajı (isteğe bağlı)",
+    action_confirmation_placeholder: "Bu eylemi gerçekleştirmek istediğinize emin misiniz?",
     delete_item: "Eliminar",
     section_overlay: "Notificación Overlay 🔔",
     overlay_mode: "Mostrar banner overlay cuando se active una alerta",
@@ -5034,6 +5078,10 @@ const ET = {
     action_pipeline_id: "Pipeline (boş = tercih edilen)",
     action_pipeline_id_help: "Kullanılacak sesli pipeline ID'si. Tercih edilen pipeline için boş bırakın.",
     action_start_listening: "Dinlemeyi başlat",
+    action_confirmation: "Ask for confirmation",
+    action_confirmation_help: "Shows a \"Are you sure?\" prompt before executing the action. Useful for destructive operations like disarming an alarm or unlocking doors.",
+    action_confirmation_text: "Confirmation message (optional)",
+    action_confirmation_placeholder: "Are you sure you want to execute this action?",
     delete_item: "Sil",
     section_overlay: "Overlay Bildirimi 🔔",
     overlay_mode: "Uyarı tetiklendiğinde overlay banner göster",
@@ -8091,7 +8139,55 @@ class AlertTickerCardEditor extends LitElement {
           </div>
         </div>
       ` : ""}
+      ${type !== "none" ? html`
+        <div class="form-row" style="margin-top:10px">
+          <div class="form-row-inline">
+            <span>${this._t("action_confirmation")}</span>
+            <ha-switch
+              .checked="${!!cfg.confirmation}"
+              @change="${(e) => this._setActionConfirmation(index, key, e.target.checked)}"
+            ></ha-switch>
+          </div>
+          <div class="helper-text">${this._t("action_confirmation_help")}</div>
+          ${cfg.confirmation ? html`
+            <ha-input
+              style="margin-top:6px"
+              .label="${this._t('action_confirmation_text')}"
+              .value="${(typeof cfg.confirmation === 'object' && cfg.confirmation.text) || ''}"
+              placeholder="${this._t('action_confirmation_placeholder')}"
+              @change="${(e) => this._setActionConfirmationText(index, key, e.target.value)}"
+            ></ha-input>
+          ` : ""}
+        </div>
+      ` : ""}
     `;
+  }
+
+  /** Enable/disable confirmation on a per-alert action */
+  _setActionConfirmation(index, key, enabled) {
+    const alert = this._config.alerts[index];
+    const cfg = { ...(alert[key] || { action: 'none' }) };
+    if (enabled) {
+      cfg.confirmation = typeof cfg.confirmation === 'object' ? cfg.confirmation : true;
+    } else {
+      delete cfg.confirmation;
+    }
+    this._updateAlert(index, { [key]: cfg });
+  }
+
+  /** Set custom confirmation text on a per-alert action */
+  _setActionConfirmationText(index, key, text) {
+    const alert = this._config.alerts[index];
+    const cfg = { ...(alert[key] || { action: 'none' }) };
+    const trimmed = (text || '').trim();
+    if (trimmed) {
+      const existing = (typeof cfg.confirmation === 'object' && cfg.confirmation) || {};
+      cfg.confirmation = { ...existing, text: trimmed };
+    } else if (typeof cfg.confirmation === 'object' && cfg.confirmation.text) {
+      const { text: _, ...rest } = cfg.confirmation;
+      cfg.confirmation = Object.keys(rest).length ? rest : true;
+    }
+    this._updateAlert(index, { [key]: cfg });
   }
 
   /** Card-level action config (clear_tap_action / clear_hold_action) */
@@ -8160,7 +8256,53 @@ class AlertTickerCardEditor extends LitElement {
           </div>
         </div>
       ` : ""}
+      ${type !== "none" ? html`
+        <div class="form-row" style="margin-top:10px">
+          <div class="form-row-inline">
+            <span>${this._t("action_confirmation")}</span>
+            <ha-switch
+              .checked="${!!cfg.confirmation}"
+              @change="${(e) => this._setCardActionConfirmation(configKey, e.target.checked)}"
+            ></ha-switch>
+          </div>
+          <div class="helper-text">${this._t("action_confirmation_help")}</div>
+          ${cfg.confirmation ? html`
+            <ha-input
+              style="margin-top:6px"
+              .label="${this._t('action_confirmation_text')}"
+              .value="${(typeof cfg.confirmation === 'object' && cfg.confirmation.text) || ''}"
+              placeholder="${this._t('action_confirmation_placeholder')}"
+              @change="${(e) => this._setCardActionConfirmationText(configKey, e.target.value)}"
+            ></ha-input>
+          ` : ""}
+        </div>
+      ` : ""}
     `;
+  }
+
+  /** Enable/disable confirmation on a card-level action (clear_*_action) */
+  _setCardActionConfirmation(configKey, enabled) {
+    const cfg = { ...(this._config[configKey] || { action: 'none' }) };
+    if (enabled) {
+      cfg.confirmation = typeof cfg.confirmation === 'object' ? cfg.confirmation : true;
+    } else {
+      delete cfg.confirmation;
+    }
+    this._fireConfig({ ...this._config, [configKey]: cfg });
+  }
+
+  /** Set custom confirmation text on a card-level action */
+  _setCardActionConfirmationText(configKey, text) {
+    const cfg = { ...(this._config[configKey] || { action: 'none' }) };
+    const trimmed = (text || '').trim();
+    if (trimmed) {
+      const existing = (typeof cfg.confirmation === 'object' && cfg.confirmation) || {};
+      cfg.confirmation = { ...existing, text: trimmed };
+    } else if (typeof cfg.confirmation === 'object' && cfg.confirmation.text) {
+      const { text: _, ...rest } = cfg.confirmation;
+      cfg.confirmation = Object.keys(rest).length ? rest : true;
+    }
+    this._fireConfig({ ...this._config, [configKey]: cfg });
   }
 
   _setCardActionConfig(configKey, field, value) {

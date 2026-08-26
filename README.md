@@ -577,6 +577,42 @@ Standard Lovelace interactions — tap, hold (500 ms), or double-tap the whole c
 
 Supported action types: `call-service`, `navigate`, `more-info`, `url`, `none`.
 
+#### `confirmation` — ask before executing *(new in 1.3.9.9.5)*
+
+Any of the action fields (`tap_action`, `hold_action`, `double_tap_action`, `snooze_action`, and the card-level `clear_*_action`) now support the HA-native `confirmation` field. When set, a confirmation dialog appears before the action fires — perfect for destructive operations:
+
+```yaml
+- entity: alarm_control_panel.home
+  state: "triggered"
+  message: "Disarm alarm"
+  tap_action:
+    action: call-service
+    service: alarm_control_panel.alarm_disarm
+    target:
+      entity_id: alarm_control_panel.home
+    confirmation:
+      text: "Are you sure you want to disarm the alarm?"
+```
+
+**Short form** — reuse the default text:
+
+```yaml
+confirmation: true
+```
+
+**Full form** with per-user exemptions:
+
+```yaml
+confirmation:
+  text: "Are you sure you want to unlock the door?"
+  exemptions:
+    - user: "<HA_USER_ID>"   # Devs → Persons → Users → copy the User ID
+```
+
+Any user listed under `exemptions` skips the prompt — useful when you want the owner to bypass while guests must confirm.
+
+Fully editable in the visual editor: every action section now has an **Ask for confirmation** toggle with an optional custom message field.
+
 ### on_change — trigger on any state change
 
 Fire an alert whenever an entity changes state, regardless of the `operator`/`state` condition. The alert stays visible until the next state change, or auto-dismisses after `auto_dismiss_after` seconds:
@@ -772,6 +808,17 @@ Tap 💤 on any active alert to snooze it. Two modes (configurable in General ta
 - **Fixed duration** — configure 30min / 1h / 4h / 8h / 24h for immediate one-tap snooze
 
 Snoozed alerts persist in `localStorage` and the card restores them automatically when the duration expires. A small amber 💤 pill appears when some alerts are snoozed while others remain active — tap it to resume all.
+
+#### 🔄 Cross-device sync *(new in 1.3.9.9.5)*
+
+If you have multiple browser tabs / wall panels / mobile devices all showing the same alert, snoozing, dismissing, or clearing a persistent alert on **one** device now propagates to **all the others in real time**. No configuration required — the card uses Home Assistant's WebSocket event bus (`alertticker_sync` events) to broadcast state changes. Each card instance ignores its own broadcasts via a per-tab device ID, so there are no loops.
+
+Works for all state transitions:
+- Snooze / unsnooze
+- Dismiss / reset all dismissed
+- Persistent alert dismiss
+
+**Note:** Because the sync uses live events, a device that was offline (browser closed) when a snooze happened won't automatically catch up when it comes back online. In that case its local storage still holds the last-known state until the next sync event or the alert re-triggers.
 
 ### snooze_action
 
