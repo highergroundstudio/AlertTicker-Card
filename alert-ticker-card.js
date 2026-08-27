@@ -2446,13 +2446,19 @@ class AlertTickerCard extends LitElement {
     if ((this._config?.show_when_clear || this._config?.show_widget_in_cycle) &&
         (clearMode === "clock" || clearMode === "weather_clock" || clearMode === "weather_forecast")) {
       const n = new Date();
+      const showSeconds = this._config?.clear_clock_show_seconds !== false
+      const mm = String(n.getMinutes()).padStart(2, "0")
+      const ss = String(n.getSeconds()).padStart(2, "0")
       if (this._config?.clear_clock_12h) {
         const h = n.getHours();
         const h12 = h % 12 || 12;
         const ampm = h < 12 ? "AM" : "PM";
-        this._clockTime = `${h12}:${String(n.getMinutes()).padStart(2,'0')}:${String(n.getSeconds()).padStart(2,'0')} ${ampm}`;
+        this._clockTime = showSeconds
+          ? `${h12}:${mm}:${ss} ${ampm}`
+          : `${h12}:${mm} ${ampm}`
       } else {
-        this._clockTime = `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}:${String(n.getSeconds()).padStart(2,'0')}`;
+        const hh = String(n.getHours()).padStart(2, "0")
+        this._clockTime = showSeconds ? `${hh}:${mm}:${ss}` : `${hh}:${mm}`
       }
       const lang = this._hass?.language || 'en';
       this._clockDate = n.toLocaleDateString(lang, { weekday: 'long', day: 'numeric', month: 'long' });
